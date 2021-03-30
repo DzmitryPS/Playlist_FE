@@ -6,7 +6,7 @@ const Table = styled.table`
  background: #f5ffff;
   border-collapse: collapse;
   text-align: left;
-
+  margin-right: 50px;
   th{
     border-top: 1px solid #777777;	
   border-bottom: 1px solid #777777; 
@@ -70,6 +70,17 @@ tbody:hover tr:hover td {
   text-shadow: none;
 }
 `
+const Div = styled.div`
+display: flex;
+form{
+    h3{
+        background: linear-gradient(#9595b6, #5a567f);
+      color: whitesmoke;
+    }
+    background: #ebf3f9;
+    margin-top: 15px;
+}
+`
 
 const Main = (props) => {
 
@@ -86,7 +97,15 @@ const Main = (props) => {
         return sortConfig.key === name ? sortConfig.direction : undefined;
     };
 
-  console.log(record)
+    //Удаляем повторяющиеся элементы из фильтра
+    const executorArr = new Set(record.map(item => item.исполнитель))
+    const backToExecutorArr = [...executorArr]
+
+    let genreArr = new Set(record.map(item => item.жанр))
+    const backToGenreArr = [...genreArr]
+
+    let yearArr = new Set(record.map(item => item.год))
+    const backToYearArr = [...yearArr]
 
     const changeExecutor = (event) => {
         setFilteredYear('Все')
@@ -125,7 +144,7 @@ const Main = (props) => {
     let filteredRecords = filteredExecutor === 'Все' && filteredGenre === 'Все' && filteredYear === 'Все' ? record : helper()
 
     return (
-        <>
+        <Div>
             <Table>
                 <caption>Плейлист</caption>
                 <thead>
@@ -166,32 +185,35 @@ const Main = (props) => {
                         }
                     </tbody>
                     :
-                    <div>Loading...</div>}
+                    <caption>Loading...</caption>}
             </Table>
-            <form>
-                <h3>Исполнитель</h3>
-                <select value={filteredExecutor} onChange={changeExecutor}>
-                    <option value="Все">Все</option>
-                    {record.map(item => (
-                        <option value={item.исполнитель}>{item.исполнитель}</option>
-                    ))}
-                </select>
-                <h3>Жанр</h3>
-                <select value={filteredGenre} onChange={changeGenre}>
-                    <option value="Все">Все</option>
-                    {record.map(item => (
-                        <option value={item.жанр}>{item.жанр}</option>
-                    ))}
-                </select>
-                <h3>Год</h3>
-                <select value={filteredYear} onChange={changeYear}>
-                    <option value="Все">Все</option>
-                    {record.map(item => (
-                        <option value={item.год}>{item.год}</option>
-                    ))}
-                </select>
-            </form>
-        </>
+            {apiLoaded ?
+                <form>
+                    <h3>Исполнитель</h3>
+                    <select value={filteredExecutor} onChange={changeExecutor}>
+                        <option value="Все">Все</option>
+                        {backToExecutorArr.map(item => (
+                            <option value={item} key={item}>{item}</option>
+                        ))}
+                    </select>
+                    <h3>Жанр</h3>
+                    <select value={filteredGenre} onChange={changeGenre}>
+                        <option value="Все">Все</option>
+                        {backToGenreArr.map(item => (
+                            <option value={item} key={item}>{item}</option>
+                        ))}
+                    </select>
+                    <h3>Год</h3>
+                    <select value={filteredYear} onChange={changeYear}>
+                        <option value="Все">Все</option>
+                        {backToYearArr.map(item => (
+                            <option value={item} key={item}>{item}</option>
+                        ))}
+                    </select>
+                </form>
+                :
+                <div>Loading...</div>}
+        </Div>
     )
 }
 
