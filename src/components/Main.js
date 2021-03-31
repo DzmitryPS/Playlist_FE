@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import styled from 'styled-components';
 import useSortableData from './useSortableData';
 
+
 const Table = styled.table`
  background: #f5ffff;
   border-collapse: collapse;
   text-align: left;
   margin-right: 50px;
+  
   th{
     border-top: 1px solid #777777;	
   border-bottom: 1px solid #777777; 
@@ -15,10 +17,12 @@ const Table = styled.table`
   color: white;
   padding: 10px 15px;
   position: relative;
-
+  width: 73px;
   button{
       background: linear-gradient(#9595b6, #5a567f);
       color: whitesmoke;
+      display:flex;
+      cursor: pointer;
   }
   }
   th button.ascending::after {
@@ -31,7 +35,6 @@ th button.descending::after {
   display: inline-block;
   margin-left: 1em;
 }
-
   th:after{
     content: "";
   display: block;
@@ -60,6 +63,12 @@ td {
   padding: 10px 15px;
   position: relative;
   transition: all 0.5s ease;
+  width:70px;
+}
+tbody{
+    max-height: 200px;
+  overflow-y: scroll;
+  position: absolute;
 }
 tbody:hover td {
   color: transparent;
@@ -73,18 +82,19 @@ tbody:hover tr:hover td {
 const Div = styled.div`
 display: flex;
 form{
+    position: absolute;
+    max-height: 250px;
     h3{
-        background: linear-gradient(#9595b6, #5a567f);
-      color: whitesmoke;
-    }
+    background: linear-gradient(#9595b6, #5a567f);
+    color: whitesmoke;}
     background: #ebf3f9;
-    margin-top: 15px;
+    margin: 15px auto;
 }
 `
 
 const Main = (props) => {
 
-    const { record, requestSort, apiLoaded, sortConfig } = useSortableData(props);
+    const { record, requestSort, apiLoaded, sortConfig, onScroll, containerRef } = useSortableData(props);
 
     const [filteredExecutor, setFilteredExecutor] = useState('Все');
     const [filteredGenre, setFilteredGenre] = useState('Все');
@@ -144,76 +154,86 @@ const Main = (props) => {
     let filteredRecords = filteredExecutor === 'Все' && filteredGenre === 'Все' && filteredYear === 'Все' ? record : helper()
 
     return (
-        <Div>
-            <Table>
-                <caption>Плейлист</caption>
-                <thead>
-                    <tr>
-                        <th>
-                            <button type="button" onClick={() => requestSort('исполнитель')} className={getClassNamesFor('исполнитель')}>
-                                Исполнитель
+        <>
+            <Div>
+                <Table>
+                    <caption>Плейлист</caption>
+                    <thead>
+                        <tr>
+                            <th>
+                                id
+                        </th>
+                            <th>
+                                <button type="button" onClick={() => requestSort('исполнитель')} className={getClassNamesFor('исполнитель')}>
+                                    Исполнитель
                         </button>
-                        </th>
-                        <th>
-                            <button type="button" onClick={() => requestSort('песня')} className={getClassNamesFor('песня')}>
-                                Песня
+                            </th>
+                            <th>
+                                <button type="button" onClick={() => requestSort('песня')} className={getClassNamesFor('песня')}>
+                                    Песня
                     </button>
-                        </th>
-                        <th>
-                            <button type="button" onClick={() => requestSort('жанр')} className={getClassNamesFor('жанр')}>
-                                Жанр
+                            </th>
+                            <th>
+                                <button type="button" onClick={() => requestSort('жанр')} className={getClassNamesFor('жанр')}>
+                                    Жанр
                     </button>
-                        </th>
-                        <th>
-                            <button type="button">
-                                Год
+                            </th>
+                            <th>
+                                <button type="button">
+                                    Год
                     </button>
-                        </th>
-                    </tr>
-                </thead>
+                            </th>
+                        </tr>
+                    </thead>
+                    {apiLoaded ?
+                        <tbody ref={containerRef} onScroll={onScroll}>
+                            {
+                                filteredRecords.map(item => (
+                                    <tr key={item.id}>
+                                        <td>{item.id}</td>
+                                        <td>{item.исполнитель}</td>
+                                        <td>{item.песня}</td>
+                                        <td>{item.жанр}</td>
+                                        <td>{item.год}</td>
+                                    </tr>
+                                ))
+                            }
+
+                        </tbody>
+                        :
+                        <caption>Loading...</caption>}
+                </Table>
                 {apiLoaded ?
-                    <tbody>
-                        {
-                            filteredRecords.map(item => (
-                                <tr key={item.id}>
-                                    <td>{item.исполнитель}</td>
-                                    <td>{item.песня}</td>
-                                    <td>{item.жанр}</td>
-                                    <td>{item.год}</td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
+                    <div>
+                        <form>
+                            <h3>Исполнитель</h3>
+                            <select value={filteredExecutor} onChange={changeExecutor}>
+                                <option value="Все">Все</option>
+                                {backToExecutorArr.map(item => (
+                                    <option value={item} key={item}>{item}</option>
+                                ))}
+                            </select>
+                            <h3>Жанр</h3>
+                            <select value={filteredGenre} onChange={changeGenre}>
+                                <option value="Все">Все</option>
+                                {backToGenreArr.map(item => (
+                                    <option value={item} key={item}>{item}</option>
+                                ))}
+                            </select>
+                            <h3>Год</h3>
+                            <select value={filteredYear} onChange={changeYear}>
+                                <option value="Все">Все</option>
+                                {backToYearArr.map(item => (
+                                    <option value={item} key={item}>{item}</option>
+                                ))}
+                            </select>
+                        </form>
+                    </div>
                     :
-                    <caption>Loading...</caption>}
-            </Table>
-            {apiLoaded ?
-                <form>
-                    <h3>Исполнитель</h3>
-                    <select value={filteredExecutor} onChange={changeExecutor}>
-                        <option value="Все">Все</option>
-                        {backToExecutorArr.map(item => (
-                            <option value={item} key={item}>{item}</option>
-                        ))}
-                    </select>
-                    <h3>Жанр</h3>
-                    <select value={filteredGenre} onChange={changeGenre}>
-                        <option value="Все">Все</option>
-                        {backToGenreArr.map(item => (
-                            <option value={item} key={item}>{item}</option>
-                        ))}
-                    </select>
-                    <h3>Год</h3>
-                    <select value={filteredYear} onChange={changeYear}>
-                        <option value="Все">Все</option>
-                        {backToYearArr.map(item => (
-                            <option value={item} key={item}>{item}</option>
-                        ))}
-                    </select>
-                </form>
-                :
-                <div>Loading...</div>}
-        </Div>
+                    <div>Loading...</div>}
+            </Div>
+
+        </>
     )
 }
 
